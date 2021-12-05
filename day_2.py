@@ -47,6 +47,6 @@ def part_two(path):
 
 
 if __name__ == "__main__":
-    input_path = '/home/trouch/Dev/adventofcode2021/day_2.csv'
+    input_path = '/home/trouch/Dev/adventofcode2021/data/day_2.csv'
     part_one(input_path)
     part_two(input_path)
