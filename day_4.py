@@ -53,10 +53,19 @@ def part_one(path):
 
 
 def part_two(path):
-    pass
+    random_draws, grids = _read_grids(path)
+
+    n_waiting = len(grids)
+    for val in random_draws:
+        success_ids = [idx for idx, grid in enumerate(grids) if grid.try_remove(val)]
+        for idx in sorted(success_ids, reverse=True):
+            grids.pop(idx)
+        n_waiting -= len(success_ids)
+        if n_waiting == 0:
+            break
 
 
 if __name__ == "__main__":
     input_path = '/home/trouch/Dev/adventofcode2021/day_4.csv'
     part_one(input_path)
-    # part_two(input_path)
+    part_two(input_path)
