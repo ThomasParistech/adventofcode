@@ -26,7 +26,19 @@ def part_one(path):
 
 
 def part_two(path):
-    pass
+    fishes = _read_lines(path)
+    counts = {k: 0 for k in range(9)}
+    for fish in fishes:
+        counts[fish] += 1
+
+    n_days = 256
+    for _ in range(n_days):
+        new_fishes = counts[0]
+        for k in range(8):
+            counts[k] = counts[k+1]
+        counts[6] += new_fishes
+        counts[8] = new_fishes
+    print(np.sum([v for (k, v) in counts.items()]))
 
 
 if __name__ == "__main__":
