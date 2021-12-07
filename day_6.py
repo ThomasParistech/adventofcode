@@ -13,6 +13,7 @@ def _read_lines(path):
 
 
 def part_one(path):
+    # Very slow and naive solution
     fishes = _read_lines(path)
     n_days = 80
 
@@ -26,6 +27,7 @@ def part_one(path):
 
 
 def part_two(path):
+    # Optimal!
     fishes = _read_lines(path)
     counts = {k: 0 for k in range(9)}
     for fish in fishes:
