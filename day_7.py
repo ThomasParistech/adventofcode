@@ -43,13 +43,16 @@ def part_one(path):
 
 
 def part_two(path):
-    values = _read_lines(path)
+    values = np.sort(_read_lines(path))
 
     def get_score(val):
         diff = np.abs(values-val)
         return int(np.sum(0.5*diff*(diff+1)))  # n(n+1)/2
 
     scores = [get_score(val) for val in values]
+    # plt.plot(values, scores)
+    # plt.show()
+
     best_indices = np.argsort(scores)
     best_val_min = np.min(values[best_indices[:2]])
     best_val_max = np.max(values[best_indices[:2]])
