@@ -1,11 +1,11 @@
 # /usr/bin/python3
 """Day XXXXXX."""
 
-from typing import List, Set, Tuple
+from typing import List, Set, Tuple, Dict
 import numpy as np
 
 
-def _read_lines(path):
+def _read_lines(path) -> Dict[str, List[str]]:  # Cave Name -> List of available cave names
     with open(path) as f:
         all_rows = f.readlines()
         paths = [tuple(row.strip().split('-')) for row in all_rows]
@@ -23,22 +23,28 @@ def _read_lines(path):
             else:
                 possibilities[b] = [a]
 
-        return possibilities  # Cave Name -> List of available cave names
+        return possibilities
 
 
-def propagate(possibilities, path_counts: int, path: List[str]) -> int:
+def propagate(possibilities, path_counts: int, path: List[str], allow_small_double: bool = False) -> int:
     if path[-1] == "end":
-        print(",".join(path))
+        # print(",".join(path))
         return path_counts + 1
 
     next_caves = possibilities[path[-1]]
     for next_cave in next_caves:
-        if (next_cave.lower() == next_cave) and next_cave in path:
-            continue
+        is_small = (next_cave.lower() == next_cave)
+        is_small_seen = is_small and next_cave in path
+        if is_small_seen:
+            if not allow_small_double:
+                continue
+            allow_small_double = False
 
         path.append(next_cave)
-        path_counts = propagate(possibilities, path_counts, path)
+        path_counts = propagate(possibilities, path_counts, path, allow_small_double)
         path.pop()
+        if is_small_seen:
+            allow_small_double = True
 
     return path_counts
 
@@ -53,17 +59,12 @@ def part_one(path: str) -> int:
 
 
 def part_two(path: str) -> int:
-    #
-    #
-    #
-    #
-    #
-    #     TODO
-    #
-    #
-    #
-    #
-    #
-    #
-    #
-    return 0
+    possibilities = _read_lines(path)
+    for _, v in possibilities.items():
+        if "start" in v:
+            v.remove("start")  # Not possible to go back to "start"
+
+    path = ["start"]
+    path_counts = propagate(possibilities, 0, path, allow_small_double=True)
+
+    return path_counts
