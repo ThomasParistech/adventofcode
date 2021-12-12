@@ -10,7 +10,7 @@ class Grid:
         self.data = grid
         self.count = 0
 
-    def next(self):
+    def next(self) -> bool:
         self.data += 1
 
         first_flashes = [(i, j) for (i, j), val in np.ndenumerate(self.data) if val > 9]
@@ -18,7 +18,9 @@ class Grid:
         for (i, j) in first_flashes:
             self._propagate_flash(i, j)
 
+        all_simultaneous_flashes = np.all(self.data > 9)
         self.data[self.data > 9] = 0
+        return all_simultaneous_flashes
 
     def _propagate_flash(self, i, j):
         self.count += 1
@@ -56,24 +58,18 @@ def part_one(path: str) -> int:
     grid = Grid(np_rows)
     for k in range(100):
         grid.next()
-        print(grid.data)
+        # print(grid.data)
 
     return grid.count
 
 
 def part_two(path: str) -> int:
-    #
-    #
-    #
-    #
-    #
-    #
-    #     TODO
-    #
-    #
-    #
-    #
-    #
-    #
-    #
+    np_rows = _read_lines(path)
+    grid = Grid(np_rows)
+    k = 1
+    while True:
+        if grid.next():
+            return k
+        k += 1
+
     return 0
