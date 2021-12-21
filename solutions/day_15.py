@@ -97,24 +97,12 @@ def part_one(path: str) -> int:
     # sum_risks = backtrack(grid_risks, mask_free, 0, 0, 0)
     # answer = sum_risks - grid_risks[0, 0]
 
-    answer = dijkstras(grid_risks)
-
-    return answer
+    return dijkstras(grid_risks)
 
 
 def part_two(path: str) -> int:
-    #
-    #
-    #
-    #
-    #
-    #
-    #     TODO
-    #
-    #
-    #
-    #
-    #
-    #
-    #
-    return 0
+    grid_risks = _read_lines(path)
+    grid_risks = np.concatenate([1+np.mod(grid_risks+k-1, 9) for k in range(5)], axis=1)
+    grid_risks = np.concatenate([1+np.mod(grid_risks+k-1, 9) for k in range(5)], axis=0)
+
+    return dijkstras(grid_risks)
