@@ -4,6 +4,7 @@
 from typing import List, Optional, Set, Tuple
 import numpy as np
 from dataclasses import dataclass
+import copy
 
 
 @dataclass
@@ -28,11 +29,12 @@ class Number:
         self.right = Number(val=int(np.ceil(self.val*0.5)), depth=self.depth+1)
         self.val = None
 
-    def add(self, other: 'Number') -> 'Number':
-        assert self.depth == 0 and other.depth == 0
+    @staticmethod
+    def add(a: "Number", b: 'Number') -> 'Number':
+        assert a.depth == 0 and b.depth == 0
         res = Number()
-        res.left = self
-        res.right = other
+        res.left = a
+        res.right = b
         res.depth = 0
         res.left.increase_depth()
         res.right.increase_depth()
@@ -161,25 +163,22 @@ def part_one(path: str) -> int:
     numbers = _read_lines(path)
     res = numbers[0]
     for k in range(1, len(numbers)):
-        res = res.add(numbers[k])
+        res = Number.add(res, numbers[k])
 
     # print(res)
     return res.magnitude()
 
 
 def part_two(path: str) -> int:
-    #
-    #
-    #
-    #
-    #
-    #
-    #     TODO
-    #
-    #
-    #
-    #
-    #
-    #
-    #
-    return 0
+    numbers = _read_lines(path)
+    max_mag = 0
+    n = len(numbers)
+    for i in range(n):
+        for j in range(n):
+            if i != j:
+                n_i = copy.deepcopy(numbers[i])
+                n_j = copy.deepcopy(numbers[j])
+                mag = Number.add(n_i, n_j).magnitude()
+                max_mag = max(max_mag, mag)
+
+    return max_mag
