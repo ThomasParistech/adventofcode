@@ -1,5 +1,5 @@
 # /usr/bin/python3
-"""Day 19."""
+"""Day 19. (Way too slow)"""
 
 from typing import List, Set, Tuple, Optional
 import numpy as np
@@ -24,7 +24,6 @@ def get_scan_pose_permutations() -> Tuple[np.ndarray, np.ndarray]:
 
 
 PERMS, SIGNS = get_scan_pose_permutations()
-# print(np.concatenate((PERMS, SIGNS), axis=1))
 
 
 @dataclass
@@ -72,11 +71,6 @@ class Scan:
             if unknown_scans[scan.idx]:
                 scan.merge_with_unknown(unknown_scans)
                 scan.xyz = pose.transform(scan.xyz)
-
-                # rotated_set_a = set(tuple(xyz) for xyz in self.xyz)
-                # rotated_set_b = set(tuple(xyz) for xyz in scan.xyz)
-                # print(rotated_set_a & rotated_set_b)
-
                 self.xyz = np.concatenate((self.xyz, scan.xyz))
                 self.xyz = np.array(list(set(tuple(xyz) for xyz in self.xyz)), dtype=int)
 
@@ -136,8 +130,6 @@ def part_one(path: str) -> int:
             poses = Scan.align_two_scans(scan_i, scan_j)
             if poses is not None:
                 pose_ij, pose_ji = poses
-                # print(i, j, pose_ij)
-                # print(j, i, pose_ji)
                 scan_j.add_neighbor(scan_i, pose_ij)
                 scan_i.add_neighbor(scan_j, pose_ji)
 
@@ -149,18 +141,31 @@ def part_one(path: str) -> int:
 
 
 def part_two(path: str) -> int:
-    #
-    #
-    #
-    #
-    #
-    #
-    #     TODO
-    #
-    #
-    #
-    #
-    #
-    #
-    #
-    return 0
+    scans = _read_lines(path)
+
+    # Build graph
+    for i, scan_i in enumerate(scans):
+        for j in range(i):
+            scan_j = scans[j]
+            poses = Scan.align_two_scans(scan_i, scan_j)
+            if poses is not None:
+                pose_ij, pose_ji = poses
+                scan_j.add_neighbor(scan_i, pose_ij)
+                scan_i.add_neighbor(scan_j, pose_ji)
+
+    for scan in scans:
+        scan.xyz = np.zeros((1, 3), dtype=int)
+
+    unknown_scans = np.ones(len(scans), dtype=bool)
+    unknown_scans[0] = False
+    scans[0].merge_with_unknown(unknown_scans)
+
+    scans_positions = list(scans[0].xyz)
+    max_manhattan = 0
+    for i, pos_i in enumerate(scans_positions):
+        for j in range(i):
+            pos_j = scans_positions[j]
+            manhattan = np.sum(np.abs(pos_i-pos_j))
+            if manhattan > max_manhattan:
+                max_manhattan = manhattan
+    return max_manhattan
