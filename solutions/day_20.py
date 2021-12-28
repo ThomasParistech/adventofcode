@@ -45,24 +45,13 @@ def _read_lines(path):
 
 def part_one(path: str) -> int:
     img = _read_lines(path)
-    img.update()
-    img.update()
+    for _ in range(2):
+        img.update()
     return img.count()
 
 
 def part_two(path: str) -> int:
-    #
-    #
-    #
-    #
-    #
-    #
-    #     TODO
-    #
-    #
-    #
-    #
-    #
-    #
-    #
-    return 0
+    img = _read_lines(path)
+    for _ in range(50):
+        img.update()
+    return img.count()
