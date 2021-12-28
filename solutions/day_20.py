@@ -17,8 +17,9 @@ class Img:
         self.background: int = 0
 
     def update(self):
-        input = cv2.copyMakeBorder(self.img.astype(np.float32), 2, 2, 2, 2, cv2.BORDER_CONSTANT, self.background)
-        output = cv2.filter2D(input, -1, KERNEL)[3:-3, 3:-3]
+        input = cv2.copyMakeBorder(self.img.astype(np.float32), 2, 2, 2, 2, borderType=cv2.BORDER_CONSTANT,
+                                   value=self.background)
+        output = cv2.filter2D(input, -1, KERNEL, borderType=cv2.BORDER_REPLICATE)[1:-1, 1:-1]
         self.img = self.algo[output.astype(int)]
 
         if self.alternate:
@@ -44,11 +45,8 @@ def _read_lines(path):
 
 def part_one(path: str) -> int:
     img = _read_lines(path)
-    print(img)
     img.update()
-    print(img)
     img.update()
-    print(img)
     return img.count()
 
 
