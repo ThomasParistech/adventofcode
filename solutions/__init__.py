@@ -28,6 +28,6 @@ EXPECTED_TOY_SOLUTIONS: List[Tuple[int, int]] = [
     (79, 3621),
     (35, 3351),  # 20
     (739785, 444356092776315),
-    (None, None),
+    (590784, None),
     (12521, 44169)
 ]
