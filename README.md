@@ -9,3 +9,4 @@ python3 -m solutions -h
 ```
 TODO:
 - optimize day 19
+- try day 22 with compressed coordinates (Sort and enumerate)
