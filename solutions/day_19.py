@@ -1,171 +1,117 @@
 # /usr/bin/python3
-"""Day 19. (Way too slow)"""
+"""Day 19 Optimized!"""
 
-from typing import List, Set, Tuple, Optional
+from typing import List, Tuple, Optional
 import numpy as np
 from itertools import permutations
-from dataclasses import dataclass
 import copy
 
 
-def get_scan_pose_permutations() -> Tuple[np.ndarray, np.ndarray]:
-    perms, signs = [], []
+def _read_lines(path):
+    with open(path) as f:
+        all_rows = f.readlines()+[""]
+        starts = 1 + np.array([idx for idx, row in enumerate(all_rows)
+                               if row.startswith("---")])
+        ends = -2+np.roll(starts, -1)
 
+        scans = [Scan(np.array([row.strip().split(",") for row in all_rows[start:end]], dtype=int))
+                 for start, end in zip(starts, ends)]
+        return scans
+
+
+def get_best_diff(a: np.ndarray, b: np.ndarray) -> Tuple[int, np.int16]:
+    diff = b[:, None, :] - a[None, :, :]  # Shape (lenB, lenA, 3)
+    diff = diff.reshape(-1, 3)
+    diff = np.c_[np.zeros(diff.shape[0]), diff].astype(np.int16)
+    diff = np.asarray(diff, order='C')  # Require diff.data.c_contiguous set to True
+    diff = diff.view(np.uint64)  # hash
+
+    unique, counts = np.unique(diff, return_counts=True)
+    best_idx = np.argmax(counts)
+    best_count = counts[best_idx]
+    best_vec3 = unique[[best_idx]].view(np.int16)[1:]
+
+    return best_count, best_vec3
+
+
+def test_all_comparisons(a: np.ndarray, b: np.ndarray) -> Optional[Tuple[np.ndarray, np.ndarray]]:
+    """Return version of a that is aligned with b"""
     for xyz in permutations([0, 1, 2]):
         for sign_x in [1, -1]:
             for sign_y in [1, -1]:
                 sign_z = sign_x*sign_y
                 if (xyz[0]+1) % 3 != xyz[1]:
                     sign_z *= -1
-                perms.append(xyz)
-                signs.append([sign_x, sign_y, sign_z])
-
-    return np.array(perms, dtype=int), np.array(signs, dtype=int)
-
-
-PERMS, SIGNS = get_scan_pose_permutations()
-
-
-@dataclass
-class Pose:
-    perms: np.ndarray
-    signs: np.ndarray
-    shift: np.ndarray
-
-    def __init__(self, perms: np.ndarray, signs: np.ndarray, shift: np.ndarray, reverse: bool):
-        if not reverse:
-            self.perms = perms
-            self.signs = signs
-            self.shift = shift
-        else:
-            self.perms = np.argsort(perms)
-            self.signs = signs[self.perms]
-            self.shift = -1 * shift[self.perms] * self.signs
-
-    def transform(self, xyz: np.ndarray) -> np.ndarray:
-        new_xyz = xyz.T[self.perms].T
-        new_xyz[:, 0] *= self.signs[0]
-        new_xyz[:, 1] *= self.signs[1]
-        new_xyz[:, 2] *= self.signs[2]
-
-        new_xyz[:] += self.shift
-        return new_xyz
+                c = copy.deepcopy(a[:, xyz])
+                c[:, 0] *= sign_x
+                c[:, 1] *= sign_y
+                c[:, 2] *= sign_z
+                best_count, best_vec3 = get_best_diff(c, b)
+                if best_count >= 12:  # Need at least 12 points in common
+                    return c + best_vec3, best_vec3
+    return None
 
 
 class Scan:
-    def __init__(self, idx: int, xyz: np.ndarray):  # Shape (nx3)
-        assert isinstance(xyz, np.ndarray)
-        self.xyz: np.ndarray = xyz
-        self.neighbors: List[Tuple[Scan, Pose, np.ndarray]] = []
-        self.idx = idx
+    def __init__(self, pts: np.ndarray) -> None:
+        self.points = pts
+        self.origin = np.zeros(3, dtype=np.int16)
 
-    def __repr__(self):
-        return "\n".join([str(pt) for pt in self.xyz])
+    def try_align(self, other: 'Scan') -> bool:
+        res = test_all_comparisons(self.points, other.points)
+        if res is None:
+            return False
 
-    def add_neighbor(self, scan: 'Scan', pose: Pose):
-        self.neighbors.append((scan, pose))
+        self.points, self.origin = res
+        return True
 
-    def merge_with_unknown(self, unknown_scans: np.ndarray):
-        unknown_scans[self.idx] = False
-        for scan, pose in self.neighbors:
-            if unknown_scans[scan.idx]:
-                scan.merge_with_unknown(unknown_scans)
-                scan.xyz = pose.transform(scan.xyz)
-                self.xyz = np.concatenate((self.xyz, scan.xyz))
-                self.xyz = np.array(list(set(tuple(xyz) for xyz in self.xyz)), dtype=int)
+    def try_align_with_all(self, self_id: int, test_ids: List[int], scans: List['Scan'],
+                           scans_ij_done: np.ndarray) -> bool:
+        for known_id in test_ids:
+            if not scans_ij_done[self_id, known_id]:
+                scans_ij_done[self_id, known_id] = True
+                scans_ij_done[known_id, self_id] = True
 
-    def __len__(self):
-        return self.xyz.shape[0]
+                if self.try_align(scans[known_id]):
+                    return True
+        return False
 
     @staticmethod
-    def align_two_scans(scan_a: 'Scan', scan_b: 'Scan') -> Optional[Pose]:
-        ref_set_a = set(tuple(xyz) for xyz in scan_a.xyz)
+    def align_scans_inplace(scans: List['Scan']):
+        aligned_ids = [0]
+        waiting_ids = list(range(1, len(scans)))
 
-        def add(tuple_a, tuple_b):
-            return tuple(val_a + val_b for val_a, val_b in zip(tuple_a, tuple_b))
+        scans_ij_done = np.zeros((len(scans), len(scans)), dtype=bool)
+        while len(waiting_ids) != 0:
+            # print(aligned_ids, waiting_ids)
+            for new_id in waiting_ids:
+                success = scans[new_id].try_align_with_all(new_id, aligned_ids, scans, scans_ij_done)
+                if success:
+                    waiting_ids.remove(new_id)
+                    aligned_ids.append(new_id)
 
-        for perms, signs in zip(PERMS, SIGNS):
-            # Rotate
-            rotated_xyz_b = copy.deepcopy(scan_b.xyz)
-            rotated_xyz_b = (rotated_xyz_b.T[perms]).T
-            rotated_xyz_b[:, 0] *= signs[0]
-            rotated_xyz_b[:, 1] *= signs[1]
-            rotated_xyz_b[:, 2] *= signs[2]
+    @staticmethod
+    def count_points(scans: List['Scan']) -> int:
+        all_pts = np.concatenate([scan.points for scan in scans])
+        all_pts = np.c_[np.zeros(all_pts.shape[0]), all_pts].astype(np.int16)
+        # diff = np.asarray(diff, order='C')  # Require diff.data.c_contiguous set to True
+        all_pts = all_pts.view(np.uint64)  # hash
+        return np.unique(all_pts).shape[0]
 
-            rotated_set_b = set(tuple(xyz) for xyz in rotated_xyz_b)
-
-            # Shift
-            for pt_a in ref_set_a:
-                for pt_b in rotated_set_b:
-                    diff = tuple(val_a - val_b for val_a, val_b in zip(pt_a, pt_b))
-                    new_set_b = set(add(pt, diff) for pt in rotated_set_b)
-                    intersection = ref_set_a & new_set_b
-                    if len(intersection) >= 12:
-                        pose_ij = Pose(perms, signs, np.array(diff), reverse=True)
-                        pose_ji = Pose(perms, signs, np.array(diff), reverse=False)
-
-                        return pose_ij, pose_ji
-
-        return None
-
-
-def _read_lines(path):
-    with open(path) as f:
-        all_rows = f.readlines()+[""]
-        starts = 1+np.array([idx for idx, row in enumerate(all_rows) if row.startswith("---")])
-        ends = -2+np.roll(starts, -1)
-
-        scans = [Scan(idx, np.array([row.strip().split(",") for row in all_rows[start:end]], dtype=int))
-                 for idx, (start, end) in enumerate(zip(starts, ends))]
-        return scans
+    @staticmethod
+    def max_l1(scans: List['Scan']) -> int:
+        origins = np.stack([scan.origin for scan in scans])
+        diff = origins[:, None, :] - origins[None, :, :]
+        return np.max(np.sum(np.abs(diff), axis=-1))
 
 
 def part_one(path: str) -> int:
     scans = _read_lines(path)
-
-    # Build graph
-    for i, scan_i in enumerate(scans):
-        for j in range(i):
-            scan_j = scans[j]
-            poses = Scan.align_two_scans(scan_i, scan_j)
-            if poses is not None:
-                pose_ij, pose_ji = poses
-                scan_j.add_neighbor(scan_i, pose_ij)
-                scan_i.add_neighbor(scan_j, pose_ji)
-
-    unknown_scans = np.ones(len(scans), dtype=bool)
-    unknown_scans[0] = False
-    scans[0].merge_with_unknown(unknown_scans)
-
-    return len(scans[0].xyz)
+    Scan.align_scans_inplace(scans)
+    return Scan.count_points(scans)
 
 
 def part_two(path: str) -> int:
     scans = _read_lines(path)
-
-    # Build graph
-    for i, scan_i in enumerate(scans):
-        for j in range(i):
-            scan_j = scans[j]
-            poses = Scan.align_two_scans(scan_i, scan_j)
-            if poses is not None:
-                pose_ij, pose_ji = poses
-                scan_j.add_neighbor(scan_i, pose_ij)
-                scan_i.add_neighbor(scan_j, pose_ji)
-
-    for scan in scans:
-        scan.xyz = np.zeros((1, 3), dtype=int)
-
-    unknown_scans = np.ones(len(scans), dtype=bool)
-    unknown_scans[0] = False
-    scans[0].merge_with_unknown(unknown_scans)
-
-    scans_positions = list(scans[0].xyz)
-    max_manhattan = 0
-    for i, pos_i in enumerate(scans_positions):
-        for j in range(i):
-            pos_j = scans_positions[j]
-            manhattan = np.sum(np.abs(pos_i-pos_j))
-            if manhattan > max_manhattan:
-                max_manhattan = manhattan
-    return max_manhattan
+    Scan.align_scans_inplace(scans)
+    return Scan.max_l1(scans)

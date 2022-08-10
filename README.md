@@ -7,6 +7,12 @@ Run following command to get more information on how to run solutions.
 ```
 python3 -m solutions -h
 ```
+
+To run part 2 of day 19, type
+```
+python3 -m solutions -d 19 -t
+```
+
+
 TODO:
-- optimize day 19
 - try day 22 with compressed coordinates (Sort and enumerate)
