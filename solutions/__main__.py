@@ -3,7 +3,7 @@
 
 import importlib
 import time
-from profiler import export_profiling_events
+from profiling.profiler import export_profiling_events
 from solutions import EXPECTED_TOY_SOLUTIONS
 
 
@@ -58,7 +58,7 @@ def main():
     run(args.day, args.part_two)
     run(args.day, args.part_two, bis=True)  # Run alternative solution if there is one available
 
-    export_profiling_events("stats/profiling.json")
+    export_profiling_events("profiling/profiling.json")
 
 
 main()
