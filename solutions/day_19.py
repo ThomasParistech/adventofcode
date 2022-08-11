@@ -6,7 +6,29 @@ import numpy as np
 from itertools import permutations
 import copy
 
+from profiling.profiler import profile
+import scipy.stats
 
+
+def get_scan_pose_permutations() -> Tuple[np.ndarray, np.ndarray]:
+    perms, signs = [], []
+
+    for xyz in permutations([0, 1, 2]):
+        for sign_x in [1, -1]:
+            for sign_y in [1, -1]:
+                sign_z = sign_x*sign_y
+                if (xyz[0]+1) % 3 != xyz[1]:
+                    sign_z *= -1
+                perms.append(xyz)
+                signs.append([sign_x, sign_y, sign_z])
+
+    return np.array(perms, dtype=int), np.array(signs, dtype=int)
+
+
+PERMS, SIGNS = get_scan_pose_permutations()
+
+
+@profile
 def _read_lines(path):
     with open(path) as f:
         all_rows = f.readlines()+[""]
@@ -19,6 +41,7 @@ def _read_lines(path):
         return scans
 
 
+@profile
 def get_best_diff(a: np.ndarray, b: np.ndarray) -> Tuple[int, np.int16]:
     diff = b[:, None, :] - a[None, :, :]  # Shape (lenB, lenA, 3)
     diff = diff.reshape(-1, 3)
@@ -32,6 +55,31 @@ def get_best_diff(a: np.ndarray, b: np.ndarray) -> Tuple[int, np.int16]:
     best_vec3 = unique[[best_idx]].view(np.int16)[1:]
 
     return best_count, best_vec3
+
+
+def test_all_comparisons_vectorized(a: np.ndarray, b: np.ndarray) -> Optional[Tuple[np.ndarray, np.ndarray]]:
+    """Return version of a that is aligned with b. Vectorized version"""
+    all_a = a[:, PERMS]
+    all_a = np.swapaxes(all_a, 0, 1)
+    all_a = np.multiply(all_a, SIGNS[:, None, :])
+
+    diff = b[None, :, None, :] - all_a[:, None, :, :]  # Shape (24, lenB, lenA, 3)
+    diff = diff.reshape(24, -1, 3)
+    diff = np.dstack((np.ones(diff.shape[:2]), diff)).astype(np.int16)
+    diff = np.asarray(diff, order='C')  # Require diff.data.c_contiguous set to True
+    diff = np.squeeze(diff.view(np.uint64))  # hash
+
+    unique, counts = scipy.stats.mode(diff, axis=1)
+
+    unique = np.squeeze(unique)
+    counts = np.squeeze(counts)
+    best_idx = np.argmax(counts)
+    best_count = counts[best_idx]
+    best_vec3 = unique[[best_idx]].view(np.int16)[1:]
+
+    if best_count >= 12:  # Need at least 12 points in common
+        return all_a[best_idx] + best_vec3, best_vec3
+    return None
 
 
 def test_all_comparisons(a: np.ndarray, b: np.ndarray) -> Optional[Tuple[np.ndarray, np.ndarray]]:
@@ -57,14 +105,17 @@ class Scan:
         self.points = pts
         self.origin = np.zeros(3, dtype=np.int16)
 
+    @profile
     def try_align(self, other: 'Scan') -> bool:
-        res = test_all_comparisons(self.points, other.points)
+        res = test_all_comparisons_vectorized(self.points, other.points)
+        # res = test_all_comparisons(self.points, other.points)
         if res is None:
             return False
 
         self.points, self.origin = res
         return True
 
+    @profile
     def try_align_with_all(self, self_id: int, test_ids: List[int], scans: List['Scan'],
                            scans_ij_done: np.ndarray) -> bool:
         for known_id in test_ids:
@@ -91,6 +142,7 @@ class Scan:
                     aligned_ids.append(new_id)
 
     @staticmethod
+    @profile
     def count_points(scans: List['Scan']) -> int:
         all_pts = np.concatenate([scan.points for scan in scans])
         all_pts = np.c_[np.zeros(all_pts.shape[0]), all_pts].astype(np.int16)
@@ -99,6 +151,7 @@ class Scan:
         return np.unique(all_pts).shape[0]
 
     @staticmethod
+    @profile
     def max_l1(scans: List['Scan']) -> int:
         origins = np.stack([scan.origin for scan in scans])
         diff = origins[:, None, :] - origins[None, :, :]
