@@ -10,7 +10,7 @@ python3 -m solutions -h
 
 To run part 2 of day 19, type
 ```
-python3 -m solutions -d 19 -t
+python3 -m 2021.solutions -d 19 -t
 ```
 
 

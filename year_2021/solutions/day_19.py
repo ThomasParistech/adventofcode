@@ -6,7 +6,7 @@ import numpy as np
 from itertools import permutations
 import copy
 
-from profiling.profiler import profile
+from year_2021.profiling.profiler import profile
 import scipy.stats
 
 

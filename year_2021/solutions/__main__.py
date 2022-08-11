@@ -3,8 +3,8 @@
 
 import importlib
 import time
-from profiling.profiler import export_profiling_events
-from solutions import EXPECTED_TOY_SOLUTIONS
+from year_2021.profiling.profiler import export_profiling_events
+from year_2021.solutions import EXPECTED_TOY_SOLUTIONS
 
 
 def parse_args():
@@ -19,7 +19,7 @@ def parse_args():
 
 
 def run(day: int, part_two: bool, bis: bool = False):
-    module_name = f"solutions.day_{day:02d}"
+    module_name = f"year_2021.solutions.day_{day:02d}"
     if bis:
         module_name += "_bis"
 
@@ -39,13 +39,13 @@ def run(day: int, part_two: bool, bis: bool = False):
         print(f"Error: {err}")
         return
 
-    toy_answer = solve(f"data/day_{day:02d}_toy.csv")
+    toy_answer = solve(f"year_2021/data/day_{day:02d}_toy.csv")
     good_answer = EXPECTED_TOY_SOLUTIONS[day][int(part_two)]
     assert toy_answer == good_answer, f"Expected {good_answer}, but got {toy_answer}"
     print(f"=> Correct toy answer: {toy_answer}")
 
     start = time.time()
-    answer = solve(f"data/day_{day:02d}.csv")
+    answer = solve(f"year_2021/data/day_{day:02d}.csv")
     end = time.time()
     print(f"=> Day answer: {answer}")
     print(f"Ran in {end-start} s")

@@ -1,8 +1,7 @@
 # /usr/bin/python3
 """Day XXXXXX."""
 
-from typing import List, Set, Tuple, Dict
-import numpy as np
+from typing import List, Dict
 
 
 def _read_lines(path) -> Dict[str, List[str]]:  # Cave Name -> List of available cave names
