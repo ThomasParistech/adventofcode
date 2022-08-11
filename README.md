@@ -8,11 +8,12 @@ Run following command to get more information on how to run solutions.
 python3 -m solutions -h
 ```
 
-To run part 2 of day 19, type
+To run part 2 of day 19 of year 2021, type
 ```
-python3 -m 2021.solutions -d 19 -t
+python3 -m year_2021.solutions -d 19 -t
 ```
 
 
 TODO:
 - try day 22 with compressed coordinates (Sort and enumerate)
+- optimize day 23
