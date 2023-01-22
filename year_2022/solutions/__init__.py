@@ -8,5 +8,6 @@ from typing import List, Tuple
 EXPECTED_TOY_SOLUTIONS: List[Tuple[int, int]] = [
     (None, None),
     (24000, 45000),
-    (15, 12)
+    (15, 12),
+    (157, None)
 ]
