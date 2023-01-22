@@ -6,30 +6,37 @@ import numpy as np
 
 
 def _intersection(left: str, right: str) -> str:
-    for l in left:
-        if l in right:
-            return l
+    return set(left) & set(right)
+
+
+def _letter_to_priority(letter: str) -> int:
+    p = ord(letter)
+    if p > 90:
+        return p - ord("a") + 1
+    return p - ord("A") + 27
 
 
 def _read_lines(path: str) -> List[List[int]]:
     with open(path) as f:
-        rows = [row.strip() for row in f.readlines()]
-        return [(row[:len(row)//2], row[len(row)//2:]) for row in rows]
+        return [row.strip() for row in f.readlines()]
 
 
 def part_one(path: str) -> int:
     rows = _read_lines(path)
 
     score = 0
-    for left, right in rows:
-        p = ord(_intersection(left, right))
-        if p > 90:
-            score += p - ord("a") + 1
-        else:
-            score += p - ord("A") + 27
+    for row in rows:
+        p_char = _intersection(row[:len(row)//2], row[len(row)//2:])
+        score += _letter_to_priority(p_char)
 
     return score
 
 
 def part_two(path: str) -> int:
-    return -1
+    rows = _read_lines(path)
+    rows = np.array(rows).reshape(-1, 3)
+    score = 0
+    for group in rows:
+        badge = set(group[0]) & set(group[1]) & set(group[2])
+        score += _letter_to_priority(list(badge)[0])
+    return score
