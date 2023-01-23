@@ -6,7 +6,7 @@ import numpy as np
 
 
 def _intersection(left: str, right: str) -> str:
-    return set(left) & set(right)
+    return list(set(left) & set(right))[0]
 
 
 def _letter_to_priority(letter: str) -> int:
