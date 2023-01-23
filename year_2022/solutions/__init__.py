@@ -11,5 +11,6 @@ EXPECTED_TOY_SOLUTIONS: List[Tuple[int, int]] = [
     (15, 12),
     (157, 70),
     (2, 4),
-    ("CMZ", "MCD")
+    ("CMZ", "MCD"),
+    (11, 26)
 ]
