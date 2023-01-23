@@ -12,7 +12,7 @@ class Monkey:
     div: int
     send_true: int
     send_false: int
-    operation: str
+    operation: Callable[[int], int]
     inspection_count: int = 0
 
     def process(self) -> List[Tuple[int, int]]:
