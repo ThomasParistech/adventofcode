@@ -18,5 +18,5 @@ EXPECTED_TOY_SOLUTIONS: List[Tuple[int, int]] = [
     (88, 36),
     (13140, None),
     (10605, 2713310158),
-    (31, None)
+    (31, 29)
 ]
