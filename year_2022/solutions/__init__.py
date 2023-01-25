@@ -20,5 +20,6 @@ EXPECTED_TOY_SOLUTIONS: List[Tuple[int, int]] = [
     (10605, 2713310158),
     (31, 29),
     (13, 140),
-    (24, None)
+    (24, 93),  # Day 14:  SLOW: 8s
+    (None, None)
 ]
