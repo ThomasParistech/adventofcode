@@ -1,59 +1,85 @@
 # /usr/bin/python3
-"""Day 5."""
+"""Day 15."""
 
+import matplotlib.pyplot as plt
 from typing import List, Tuple
 import numpy as np
+
 from dataclasses import dataclass
 
 
 @dataclass
-class Move:
-    n: int
-    src: int
-    dst: int
+class Sensor:
+    x: int
+    y: int
+    beacon_x: int
+    beacon_y: int
+    beacon_dist: int = 0
+
+    def __post_init__(self) -> None:
+        self.beacon_dist = abs(self.beacon_x-self.x) + abs(self.beacon_y-self.y)
 
 
-def _read_lines(path: str) -> Tuple[List[List[int]], List[Move]]:
+def _read_lines(path: str) -> Tuple[int,  List[Sensor]]:
     with open(path) as f:
-        begin, end = tuple(f.read().split("\n\n"))
-        begin = begin.split("\n")
-        end = end.split("\n")
-        n_piles = int(begin.pop().strip().split(" ")[-1])
+        y_row = int(f.readline().strip().split("=")[-1])
+        sensors: List[Sensor] = []
+        for row in f.readlines():
+            scan, beacon = row.strip().split(': closest beacon is at x=')
+            x, y = tuple(map(int, scan.split("Sensor at x=")[-1].split(", y=")))
+            beacon_x, beacon_y = tuple(map(int, beacon.split(", y=")))
+            sensors.append(Sensor(x=x,
+                                  y=y,
+                                  beacon_x=beacon_x,
+                                  beacon_y=beacon_y))
+        return y_row, sensors
 
-        stocks = [[] for _ in range(n_piles)]
-        for k in range(len(begin)):  # From bottom to top
-            row = begin[-k-1]+" "
-            row = [row[i:i+4][1:-2] for i in range(0, len(row), 4)]
-            for i, letter in enumerate(row):
-                if letter != " ":
-                    stocks[i].append(letter)
 
-        cmds = []
-        for row in end:
-            row, dst = row.split(" to ")
-            row, src = row.split(" from ")
-            n = row.split("move ")[-1]
-            cmds.append(Move(n=int(n), src=int(src)-1, dst=int(dst)-1))
-
-        return stocks, cmds
+def _is_overlapping(a: Tuple[int, int], b: Tuple[int, int]) -> bool:
+    return a[1] >= b[0] and b[1] >= a[0]
 
 
 def part_one(path: str) -> int:
-    stocks, cmds = _read_lines(path)
+    y_row, sensors = _read_lines(path)
 
-    for cmd in cmds:
-        for _ in range(cmd.n):
-            val = stocks[cmd.src].pop()
-            stocks[cmd.dst].append(val)
+    # Find intervals
+    intervals = []
+    for s in sensors:
+        dx = s.beacon_dist - abs(s.y - y_row)
+        if dx >= 0:
+            intervals.append((s.x-dx, s.x+dx))
 
-    return "".join([pile[-1] for pile in stocks])
+    # Merge intervals
+    final_intervals = []
+    while len(intervals) != 0:
+        inter_ref = intervals[-1]
+
+        tmp_intervals, overlapping = [], []
+        for inter in intervals:
+            if _is_overlapping(inter, inter_ref):
+                overlapping.append(inter)
+            else:
+                tmp_intervals.append(inter)
+
+        if len(overlapping) == 1:
+            final_intervals.append(intervals.pop())
+        else:
+            xmin = np.min([inter[0] for inter in overlapping])
+            xmax = np.max([inter[1] for inter in overlapping])
+            tmp_intervals.append((xmin, xmax))
+            intervals = tmp_intervals
+    count = np.sum([inter[1]-inter[0]+1 for inter in final_intervals])
+
+    # Remove Beacons
+    x_beacons = set([s.beacon_x for s in sensors if s.beacon_y == y_row])
+    count -= np.count_nonzero([inter[0] <= x <= inter[1]
+                               for inter in final_intervals
+                               for x in x_beacons])
+
+    return count
 
 
 def part_two(path: str) -> int:
-    stocks, cmds = _read_lines(path)
+    rows = _read_lines(path)
 
-    for cmd in cmds:
-        stocks[cmd.dst].extend(stocks[cmd.src][-cmd.n:])
-        stocks[cmd.src] = stocks[cmd.src][:-cmd.n]
-
-    return "".join([pile[-1] for pile in stocks])
+    return -1
