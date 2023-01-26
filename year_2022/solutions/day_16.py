@@ -1,10 +1,7 @@
 # /usr/bin/python3
 """Day 16."""
 
-
-import itertools
-from typing import List, Dict, Tuple, Set
-import numpy as np
+from typing import List, Dict, Tuple
 from dataclasses import dataclass, field
 
 
