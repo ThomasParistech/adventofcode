@@ -2,7 +2,8 @@
 """Day 16."""
 
 
-from typing import List, Dict, Tuple
+import itertools
+from typing import List, Dict, Tuple, Set
 import numpy as np
 from dataclasses import dataclass, field
 
@@ -46,6 +47,12 @@ def _read_lines(path: str) -> Dict[str, Valve]:
             valves[name] = Valve(rate=int(rate),
                                  children=children.split(", "))
 
+        for name, valve in valves.items():
+            if name == "AA" or valve.rate != 0:
+                valve.compute_distances(name, valves)
+
+        valves = {name: valve for name, valve in valves.items() if valve.rate != 0 or name == "AA"}
+
         return valves
 
 
@@ -55,47 +62,67 @@ BEST_PATH = ""
 
 def part_one(path: str) -> int:
     valves = _read_lines(path)
-    for name, valve in valves.items():
-        if name == "AA" or valve.rate != 0:
-            valve.compute_distances(name, valves)
 
-    valves = {name: valve for name, valve in valves.items() if valve.rate != 0 or name == "AA"}
-
-    def backtrack(path_names: List[str], path_remaining_times: List[int], time: int) -> int:
-        # path : name + time needed to go to it
-        crt_valve = valves[path_names[-1]]
-
-        for child, dist in crt_valve.distances.items():
-            if child in path_names:
-                continue
-            next_time = time+dist+1
-            if next_time > 30:
-                continue
-
-            path_names.append(child)
-            path_remaining_times.append(30-next_time)
-            backtrack(path_names, path_remaining_times, next_time)
-            path_names.pop()
-            path_remaining_times.pop()
-
-        # Compute pressure
-        pressure = 0
-        for p, remaining_t in zip(path_names, path_remaining_times):
-            pressure += valves[p].rate * remaining_t
-
+    def backtrack(path_names: List[str], pressure: int, time: int):
         global MAXI_PRESSURE
         global BEST_PATH
         if pressure > MAXI_PRESSURE:
             MAXI_PRESSURE = pressure
             BEST_PATH = "->".join(path_names)
 
-    backtrack(["AA"], [0], 0)
+        crt_valve = valves[path_names[-1]]
+        for child, dist in crt_valve.distances.items():
+            if child in path_names:
+                continue
+
+            next_time = time+dist+1
+            if next_time > 30:
+                continue
+
+            backtrack(path_names+[child], pressure + valves[child].rate * (30-next_time), next_time)
+
+    backtrack(["AA"], 0, 0)
     print(BEST_PATH, MAXI_PRESSURE)
 
     return MAXI_PRESSURE
 
 
 def part_two(path: str) -> int:
-    rows = _read_lines(path)
+    valves = _read_lines(path)
+    assert len(valves) <= 16  # Bit manip
 
-    return -1
+    names_to_index: Dict[str, int] = {name: k for k, name in enumerate(valves.keys())}
+    rates: List[int] = [valve.rate for valve in valves.values()]
+    distances: List[List[Tuple[int, int]]] = [[(names_to_index[child], dist)
+                                               for child, dist in valve.distances.items()]
+                                              for valve in valves.values()]  # idx and distance
+
+    anagrams_score: Dict[int, int] = {}
+
+    def backtrack(anagrams_score: Dict[int, int], path_indices: List[int], hash_idx: int, pressure: int, time: int):
+        anagrams_score[hash_idx] = max(pressure, anagrams_score.get(hash_idx, 0))
+
+        for child, dist in distances[path_indices[-1]]:
+            if child in path_indices:
+                continue
+
+            next_time = time+dist+1
+            if next_time > 26:
+                continue
+
+            backtrack(anagrams_score, path_indices+[child], hash_idx | (1 << child),
+                      pressure + rates[child] * (26-next_time), next_time)
+
+    backtrack(anagrams_score, [0], 0, 0, 0)
+
+    list_anagrams_score: List[Tuple[int, int]] = list(anagrams_score.items())
+    n_anagrams = len(list_anagrams_score)
+    print(f"{n_anagrams} anagrams")
+
+    max_pressure = 0
+    for i, (set_i, p_i) in enumerate(list_anagrams_score):
+        for set_j, p_j in list_anagrams_score[:i]:
+            if set_i & set_j == 0:
+                max_pressure = max(max_pressure, p_i+p_j)
+
+    return max_pressure

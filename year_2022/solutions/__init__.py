@@ -22,5 +22,13 @@ EXPECTED_TOY_SOLUTIONS: List[Tuple[int, int]] = [
     (13, 140),
     (24, 93),  # Day 14:  SLOW 8s
     (26, 56000011),  # Day 15: SLOW 80s. Idea: Rotate space by 45° to have aabb
-    (1651, None)
+    (1651, 1707),
+    (None, None),
+    (None, None),
+    (None, None),
+    (None, None),
+    (None, None),
+    (None, None),
+    (None, None),
+    (None, None)
 ]
