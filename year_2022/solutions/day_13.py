@@ -1,11 +1,10 @@
 # /usr/bin/python3
+# type: ignore
 """Day 13."""
 
+from enum import Enum
 from functools import cmp_to_key
 from typing import List
-import numpy as np
-
-from enum import Enum
 
 
 class Comparison(Enum):

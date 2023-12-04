@@ -1,10 +1,12 @@
 # /usr/bin/python3
+# type: ignore
 """Day 14."""
 
-from typing import List, Tuple, Optional
-import numpy as np
 from enum import IntEnum
+from typing import Tuple
+
 import cv2
+import numpy as np
 
 
 class Pixel(IntEnum):

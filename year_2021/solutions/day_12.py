@@ -1,7 +1,9 @@
 # /usr/bin/python3
+# type: ignore
 """Day XXXXXX."""
 
-from typing import List, Dict
+from typing import Dict
+from typing import List
 
 
 def _read_lines(path) -> Dict[str, List[str]]:  # Cave Name -> List of available cave names

@@ -1,9 +1,13 @@
 # /usr/bin/python3
+# type: ignore
 """Day 7."""
+from dataclasses import dataclass
+from dataclasses import field
+from typing import Dict
+from typing import List
+from typing import Optional
 
-from typing import List, Optional, Dict
 import numpy as np
-from dataclasses import dataclass, field
 
 
 @dataclass

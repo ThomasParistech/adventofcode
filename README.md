@@ -2,18 +2,22 @@
 
 My solutions to https://adventofcode.com/2021/
 
-Run following command to get more information on how to run solutions.
-
+To get more information on how to run solutions, run:
 ```
-python3 -m solutions -h
-```
-
-To run part 2 of day 19 of year 2021, type
-```
-python3 -m year_2021.solutions -d 19 -t
+python3 -m python -h
 ```
 
+To evaluate part 2 of day 19 of year 2021, run:
+```
+python3 -m python -y 2021 -d 19 -t
+```
 
-TODO:
-- try day 22 with compressed coordinates (Sort and enumerate)
-- optimize day 23
+To evaluate part 2 of day 19 of the most recent available year, run:
+```
+python3 -m python -d 19 -t
+```
+
+To evaluate each day of year 2022 and generate a diagram, run:
+```
+python3 -m python -y 2022
+```

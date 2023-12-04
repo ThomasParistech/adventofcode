@@ -2,8 +2,9 @@
 """Day 3."""
 
 import copy
-import pandas as pd
+
 import numpy as np
+import pandas as pd
 
 
 def bin_list_to_decimal(bin_list):

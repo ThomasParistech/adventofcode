@@ -1,11 +1,10 @@
 # /usr/bin/python3
-"""Day 10."""
+"""Day 20."""
 
 from typing import List
-import numpy as np
 
 
-def _read_lines(path: str) -> List[List[int]]:
+def _read_lines(path: str) -> List[str]:
     with open(path) as f:
         return [row.strip() for row in f.readlines()]
 

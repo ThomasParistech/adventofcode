@@ -1,8 +1,8 @@
 # /usr/bin/python3
+# type: ignore
 """Day 4."""
 
 from typing import List
-import numpy as np
 
 
 def _read_lines(path: str) -> List[List[int]]:

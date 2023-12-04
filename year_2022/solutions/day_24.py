@@ -1,22 +1,21 @@
 # /usr/bin/python3
-"""Day 14."""
+"""Day 24."""
 
 from typing import List
-import numpy as np
 
 
-def _read_lines(path: str) -> List[List[int]]:
+def _read_lines(path: str) -> List[str]:
     with open(path) as f:
         return [row.strip() for row in f.readlines()]
 
 
-def part_one(path: str) -> int:
+def part_one(path: str) -> str:
     rows = _read_lines(path)
 
-    return -1
+    return ""
 
 
-def part_two(path: str) -> int:
+def part_two(path: str) -> str:
     rows = _read_lines(path)
 
-    return -1
+    return ""

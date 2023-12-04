@@ -2,11 +2,14 @@
 """Day 22."""
 
 
-from typing import Dict, List, Tuple
-import numpy as np
 import bisect
-from dataclasses import dataclass
 from collections import defaultdict
+from dataclasses import dataclass
+from typing import Dict
+from typing import List
+from typing import Tuple
+
+import numpy as np
 
 
 def _read_lines(path):

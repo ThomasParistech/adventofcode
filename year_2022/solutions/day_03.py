@@ -1,7 +1,9 @@
 # /usr/bin/python3
+# type: ignore
 """Day 3."""
 
 from typing import List
+
 import numpy as np
 
 

@@ -1,11 +1,15 @@
 # /usr/bin/python3
+# type: ignore
 """Day 19 old version. (Way too slow)"""
 
-from typing import List, Set, Tuple, Optional
-import numpy as np
-from itertools import permutations
-from dataclasses import dataclass
 import copy
+from dataclasses import dataclass
+from itertools import permutations
+from typing import List
+from typing import Optional
+from typing import Tuple
+
+import numpy as np
 
 
 def get_scan_pose_permutations() -> Tuple[np.ndarray, np.ndarray]:

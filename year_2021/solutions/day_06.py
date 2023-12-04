@@ -21,7 +21,8 @@ def part_one(path: str) -> int:
         fishes -= 1
         new_parents = (fishes == -1)
         fishes[new_parents] = 6
-        fishes = np.concatenate((fishes, 8*np.ones_like(fishes[new_parents], dtype=int)))
+        fishes = np.concatenate(
+            (fishes, 8*np.ones_like(fishes[new_parents], dtype=int)))
         # print(fishes)
 
     return len(fishes)

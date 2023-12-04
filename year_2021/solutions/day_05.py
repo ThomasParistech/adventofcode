@@ -1,4 +1,5 @@
 # /usr/bin/python3
+# type: ignore
 """Day 5."""
 
 import numpy as np

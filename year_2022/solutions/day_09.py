@@ -1,9 +1,12 @@
 # /usr/bin/python3
 """Day 9."""
 
-from typing import List, Set, Tuple, Optional, Dict
-import numpy as np
-from dataclasses import dataclass, field
+from dataclasses import dataclass
+from dataclasses import field
+from typing import Dict
+from typing import List
+from typing import Optional
+from typing import Tuple
 
 
 @dataclass

@@ -1,9 +1,12 @@
 # /usr/bin/python3
+# type: ignore
 """Day 16."""
 
-from typing import List, Optional, Set, Tuple
-import numpy as np
 from dataclasses import dataclass
+from typing import Optional
+from typing import Tuple
+
+import numpy as np
 
 hexa_to_bin_dict = {'0': "0000",
                     '1': "0001",

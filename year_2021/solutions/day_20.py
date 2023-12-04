@@ -1,10 +1,9 @@
 # /usr/bin/python3
+# type: ignore
 """Day 20."""
 
-from typing import List, Set, Tuple
-import numpy as np
 import cv2
-import copy
+import numpy as np
 
 KERNEL = 2**(np.reshape(np.array(list(range(8, -1, -1)), dtype=np.float32), (3, 3)))
 

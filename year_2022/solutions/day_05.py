@@ -1,9 +1,10 @@
 # /usr/bin/python3
+# type: ignore
 """Day 5."""
 
-from typing import List, Tuple
-import numpy as np
 from dataclasses import dataclass
+from typing import List
+from typing import Tuple
 
 
 @dataclass

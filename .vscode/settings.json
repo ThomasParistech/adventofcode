@@ -1,12 +1,27 @@
 {
-    "python.pythonPath": "/usr/bin/python3",
-    "python.linting.pylintEnabled": true,
-    "python.linting.enabled": true,
-    "python.formatting.autopep8Args": [
-        "--max-line-length",
-        "119"
+    "ruff.organizeImports": true,
+    "python.analysis.typeCheckingMode": "basic",
+    "autopep8.args": [
+        "--max-line-length=119"
     ],
+    "[python]": {
+        "diffEditor.ignoreTrimWhitespace": false,
+        "gitlens.codeLens.symbolScopes": [
+            "!Module"
+        ],
+        "editor.formatOnType": true,
+        "editor.wordBasedSuggestions": false,
+        "editor.defaultFormatter": "ms-python.autopep8",
+        "editor.formatOnSave": true
+    },
     "editor.rulers": [
         120
+    ],
+    "ruff.lint.args": [
+        "--config=.vscode/ruff.toml"
+    ],
+    "mypy-type-checker.args": [
+        "--config-file",
+        ".vscode/.mypy.ini"
     ]
 }

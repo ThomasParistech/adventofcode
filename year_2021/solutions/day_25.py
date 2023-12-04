@@ -1,7 +1,6 @@
 # /usr/bin/python3
 """Day 25."""
 
-from typing import List, Set, Tuple
 import numpy as np
 
 

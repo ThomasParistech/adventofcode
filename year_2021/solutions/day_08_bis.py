@@ -1,11 +1,12 @@
 # /usr/bin/python3
+# type: ignore
 """Brute force variant of Day 8."""
 
-from typing import List, Set, Tuple
-import numpy as np
-from itertools import permutations
 import copy
-import time
+from itertools import permutations
+from typing import List
+from typing import Set
+from typing import Tuple
 
 
 def sort_str(s) -> str:

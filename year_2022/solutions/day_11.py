@@ -1,9 +1,12 @@
 # /usr/bin/python3
+# type: ignore
 """Day 11."""
 
-from typing import List, Callable, Tuple, Dict
-import numpy as np
 from dataclasses import dataclass
+from typing import Callable
+from typing import Dict
+from typing import List
+from typing import Tuple
 
 
 @dataclass

@@ -1,10 +1,13 @@
 # /usr/bin/python3
+# type: ignore
 """Day 18."""
 
-from typing import List, Optional, Set, Tuple
-import numpy as np
-from dataclasses import dataclass
 import copy
+from dataclasses import dataclass
+from typing import Optional
+from typing import Tuple
+
+import numpy as np
 
 
 @dataclass

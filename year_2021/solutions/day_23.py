@@ -1,9 +1,13 @@
 # /usr/bin/python3
+# type: ignore
 """Day 23."""
 
-from typing import Dict, List, Optional, Tuple
-import numpy as np
+from typing import Dict
+from typing import List
+from typing import Optional
+from typing import Tuple
 
+import numpy as np
 
 HALLWAY_CELLS = np.array([0, 10, 30, 50, 70, 90, 100])
 

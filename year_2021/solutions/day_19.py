@@ -1,13 +1,16 @@
 # /usr/bin/python3
 """Day 19 Optimized!"""
 
-from typing import List, Tuple, Optional
-import numpy as np
-from itertools import permutations
 import copy
+from itertools import permutations
+from typing import List
+from typing import Optional
+from typing import Tuple
 
-from year_2021.profiling.profiler import profile
+import numpy as np
 import scipy.stats
+
+from python.utils.profiler import profile
 
 
 def get_scan_pose_permutations() -> Tuple[np.ndarray, np.ndarray]:

@@ -1,9 +1,12 @@
 # /usr/bin/python3
+# type: ignore
 """Day 8."""
 
-from typing import List, Set, Tuple
+from typing import List
+from typing import Set
+from typing import Tuple
+
 import numpy as np
-import time
 
 
 class Solver:

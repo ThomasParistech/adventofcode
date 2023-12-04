@@ -1,7 +1,9 @@
 # /usr/bin/python3
+# type: ignore
 """Day 4."""
 
 from typing import Optional
+
 import numpy as np
 
 bingo_size = 5

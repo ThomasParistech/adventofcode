@@ -1,8 +1,10 @@
 # /usr/bin/python3
+# type: ignore
 """Day XXXXXX."""
 
-from typing import List, Optional, Set, Tuple
-import numpy as np
+from typing import List
+from typing import Optional
+from typing import Tuple
 
 values_errors_dict = {
     ")": 3,

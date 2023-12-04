@@ -2,8 +2,6 @@
 """Day 7."""
 
 import numpy as np
-from matplotlib import pyplot as plt
-import copy
 
 
 def _read_lines(path):

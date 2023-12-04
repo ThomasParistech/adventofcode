@@ -1,7 +1,11 @@
 # /usr/bin/python3
+# type: ignore
 """Day 15."""
 
-from typing import List, Set, Tuple, Optional
+from typing import List
+from typing import Optional
+from typing import Tuple
+
 import numpy as np
 
 

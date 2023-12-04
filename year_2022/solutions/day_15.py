@@ -1,11 +1,11 @@
 # /usr/bin/python3
 """Day 15."""
 
-import matplotlib.pyplot as plt
-from typing import List, Tuple
-import numpy as np
-
 from dataclasses import dataclass
+from typing import List
+from typing import Tuple
+
+import numpy as np
 
 
 @dataclass
