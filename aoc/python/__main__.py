@@ -32,13 +32,18 @@ def get_expected_toy_solution(year: int, day: int, part_two: bool) -> Optional[s
         return val
 
 
-def get_data(year: int, day: int, toy: bool) -> Optional[str]:
+def get_data(year: int, day: int, part_two: bool, toy: bool) -> Optional[str]:
     """Get CSV data file for a given year and day (real or toy data)"""
     year_folder = get_year_folder(year, assert_exists=True)
     base = os.path.join(year_folder, f"data/day_{day:02d}")
+
     if toy:
-        base += "_toy"
-    path = base+".csv"
+        path = base+"_toy.csv"
+        if not os.path.isfile(path):
+            path = base + "_toy_" + ("part_two" if part_two else "part_one") + ".csv"
+    else:
+        path = base+".csv"
+
     return path if os.path.isfile(path) else None
 
 
@@ -73,7 +78,7 @@ def run(year: int, day: int, part_two: bool, bis: bool = False) -> bool:
         print(f"Error: {err}")
         return False
 
-    toy_data = get_data(year, day, toy=True)
+    toy_data = get_data(year, day, part_two, toy=True)
     if toy_data is None:
         print(f"Missing toy CSV file for day {day} of year {year}")
         return False
@@ -89,7 +94,7 @@ def run(year: int, day: int, part_two: bool, bis: bool = False) -> bool:
 
     print(f"=> Correct toy answer: {toy_answer}")
 
-    day_data = get_data(year, day, toy=False)
+    day_data = get_data(year, day, part_two, toy=False)
     if day_data is None:
         print(f"Missing CSV file for day {day} of year {year}")
         return False
