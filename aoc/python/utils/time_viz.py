@@ -6,7 +6,7 @@ from typing import List
 import matplotlib.pyplot as plt
 import numpy as np
 
-from python import get_year_folder
+from aoc.python import get_year_folder
 
 
 def generate_times_figure(year: int, times_part_one: List[float], times_part_two: List[float]):

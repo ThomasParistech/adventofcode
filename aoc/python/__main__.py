@@ -12,9 +12,9 @@ import fire
 import numpy as np
 from tqdm import tqdm
 
-from python import get_year_folder
-from python.utils.profiler import export_profiling_events
-from python.utils.time_viz import generate_times_figure
+from aoc.python import get_year_folder
+from aoc.python.utils.profiler import export_profiling_events
+from aoc.python.utils.time_viz import generate_times_figure
 
 
 def get_expected_toy_solution(year: int, day: int, part_two: bool) -> Optional[str]:

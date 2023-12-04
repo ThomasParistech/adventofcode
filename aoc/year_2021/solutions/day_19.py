@@ -10,7 +10,7 @@ from typing import Tuple
 import numpy as np
 import scipy.stats
 
-from python.utils.profiler import profile
+from aoc.python.utils.profiler import profile
 
 
 def get_scan_pose_permutations() -> Tuple[np.ndarray, np.ndarray]:
