@@ -31,6 +31,16 @@ def split_in_two(s: str, sep: str) -> Tuple[str, str]:
     return sep_split[0].strip(), sep_split[1].strip()
 
 
+def split_last(s: str, sep: str) -> str:
+    """Split and take last."""
+    return s.strip().split(sep)[-1]
+
+
+def split_first(s: str, sep: str) -> str:
+    """Split and take first."""
+    return s.strip().split(sep)[0]
+
+
 def split_in_three(s: str, sep: str) -> Tuple[str, str, str]:
     """Split in three."""
     sep_split = s.strip().split(sep)
@@ -52,4 +62,14 @@ def split_in_three_ints(s: str, sep: str) -> Tuple[int, int, int]:
 
 def split_list_int(s: str, sep: str) -> List[int]:
     """Split into list of ints."""
-    return [int(x) for x in s.split(sep)]
+    return [int(x) for x in s.strip().split(sep)]
+
+
+def squeeze_symbol(s: str, symbol: str) -> str:
+    """Squeeze consecutive occurences of a symbol."""
+    done = False
+    while not done:
+        new_s = s.replace(symbol*2, symbol)
+        done = new_s == s
+        s = new_s
+    return s
