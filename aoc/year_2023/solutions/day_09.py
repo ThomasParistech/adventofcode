@@ -1,16 +1,10 @@
 # /usr/bin/python3
 """Day 9."""
-import math
-from dataclasses import dataclass
-from functools import reduce
-from typing import Dict
-from typing import List
-from typing import Set
 
 import numpy as np
 
-from aoc.python.utils.parsing import read_lines, split_list_int
-from aoc.python.utils.parsing import split_in_two
+from aoc.python.utils.parsing import read_lines
+from aoc.python.utils.parsing import split_list_int
 
 
 def predict_right(values: np.ndarray) -> int:

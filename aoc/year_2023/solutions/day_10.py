@@ -2,107 +2,205 @@
 """Day 10."""
 import math
 from dataclasses import dataclass
-from functools import reduce
-from typing import Dict
 from typing import List
-from typing import Set, Tuple, Optional
+from typing import Optional
+from typing import Tuple
 
 import numpy as np
 
 from aoc.python.utils.parsing import read_lines
-from aoc.python.utils.parsing import split_in_two
-
-from aoc.python.utils.display import plot_int_array
 
 
-def init_grid(path: str) -> Tuple[List[Optional[Tuple[int, int]]], int, int, int]:
-    lines = read_lines(path)
-    height, width = len(lines), len(lines[0])
-    flat_grid: List[Optional[Tuple[int, int]]] = [None] * (height*width)
+@dataclass
+class PairIJ:
+    i: int
+    j: int
 
-    def ij_to_key(i: int, j: int) -> int:
-        if i < 0 or j < 0 or i >= height or j >= width:
-            return -1
-        return i * width + j
+    @property
+    def left(self) -> 'PairIJ':
+        return PairIJ(self.i, self.j-1)
 
-    start_ij = None
-    for i, line in enumerate(lines):
-        for j, c in enumerate(line):
-            crt_key = ij_to_key(i, j)
+    @property
+    def right(self) -> 'PairIJ':
+        return PairIJ(self.i, self.j+1)
 
-            links = None
-            if c == "|":
-                links = (i-1, j), (i+1, j)
-            elif c == "-":
-                links = (i, j-1), (i, j+1)
-            elif c == "L":
-                links = (i-1, j), (i, j+1)
-            elif c == "J":
-                links = (i-1, j), (i, j-1)
-            elif c == "7":
-                links = (i+1, j), (i, j-1)
-            elif c == "F":
-                links = (i+1, j), (i, j+1)
-            elif c == "S":
-                start_ij = (i, j)
+    @property
+    def up(self) -> 'PairIJ':
+        return PairIJ(self.i-1, self.j)
 
-            if links is not None:
-                flat_grid[crt_key] = (ij_to_key(*links[0]), ij_to_key(*links[1]))
+    @property
+    def down(self) -> 'PairIJ':
+        return PairIJ(self.i+1, self.j)
 
-    assert start_ij is not None
-    start_key = ij_to_key(*start_ij)
-    linked_neighbors_key = []
-    for neighbor_ij in [(start_ij[0], start_ij[1]-1),
-                        (start_ij[0], start_ij[1]+1),
-                        (start_ij[0]-1, start_ij[1]),
-                        (start_ij[0]+1, start_ij[1])]:
-        neighbor_key = ij_to_key(*neighbor_ij)
-        neighbor_neighbors = flat_grid[neighbor_key]
-        if neighbor_neighbors is not None and start_key in neighbor_neighbors:
-            linked_neighbors_key.append(neighbor_key)
-    assert len(linked_neighbors_key) == 2, f"{len(linked_neighbors_key)=}"
-    flat_grid[start_key] = (linked_neighbors_key[0], linked_neighbors_key[1])
-    return flat_grid, start_key, height, width
+    def is_valid(self, height: int, width: int) -> bool:
+        return 0 <= self.i < height and 0 <= self.j < width
+
+
+@dataclass
+class NeighborsGrid:
+    grid: List[List[Tuple[PairIJ, ...]]]
+    symbols: List[List[str]]
+    start: PairIJ
+
+    def __getitem__(self, ij: PairIJ) -> Tuple[PairIJ, ...]:
+        return self.grid[ij.i][ij.j]
+
+    def __setitem__(self, ij: PairIJ, ngbs: Tuple[PairIJ, ...]):
+        self.grid[ij.i][ij.j] = ngbs
+
+    def get_symbol(self, ij: PairIJ) -> str:
+        return self.symbols[ij.i][ij.j]
+
+    @property
+    def shape(self) -> Tuple[int, int]:
+        return len(self.grid), len(self.grid[0])
+
+    @staticmethod
+    def from_str(path: str) -> 'NeighborsGrid':
+        lines = read_lines(path)
+        height, width = len(lines), len(lines[0])
+
+        grid: List[List[Tuple[PairIJ, ...]]] = []
+        start: Optional[PairIJ] = None
+
+        for i, line in enumerate(lines):
+            grid_row: List[Tuple[PairIJ, ...]] = []
+            for j, c in enumerate(line):
+                ij = PairIJ(i, j)
+
+                links = None
+                if c == "|":
+                    links = ij.up, ij.down
+                elif c == "-":
+                    links = ij.left, ij.right
+                elif c == "L":
+                    links = ij.up, ij.right
+                elif c == "J":
+                    links = ij.up, ij.left
+                elif c == "7":
+                    links = ij.left, ij.down
+                elif c == "F":
+                    links = ij.right, ij.down
+                elif c == "S":
+                    start = ij
+
+                grid_row.append(tuple(linked_ij for linked_ij in links if linked_ij.is_valid(height, width))
+                                if links is not None
+                                else tuple())
+            grid.append(grid_row)
+
+        assert start is not None
+        ngb_grid = NeighborsGrid(grid, start=start, symbols=[list(line) for line in lines])
+
+        ngb_grid[start] = tuple(ngb
+                                for ngb in [start.left, start.right, start.up, start.down]
+                                if start in ngb_grid[ngb])
+        assert len(ngb_grid[start]) == 2
+        ngb_0, ngb_1 = ngb_grid[start]
+
+        start_symbol = None
+        if ngb_0.i == ngb_1.i:
+            start_symbol = "-"
+        elif ngb_0.j == ngb_1.j:
+            start_symbol = "|"
+        else:
+            if start.i+1 in (ngb_0.i, ngb_1.i):
+                if start.j+1 in (ngb_0.j, ngb_1.j):
+                    start_symbol = "F"
+                else:
+                    start_symbol = "7"
+            else:
+                if start.j+1 in (ngb_0.j, ngb_1.j):
+                    start_symbol = "L"
+                else:
+                    start_symbol = "J"
+
+        assert start_symbol is not None
+        ngb_grid.symbols[start.i][start.j] = start_symbol
+
+        return ngb_grid
 
 
 def part_one(path: str) -> int:
-    flat_grid, start_key, _, _ = init_grid(path)
+    grid = NeighborsGrid.from_str(path)
 
-    start_neighbor_keys = flat_grid[start_key]
-    assert start_neighbor_keys is not None
-    key_path: List[int] = [start_key, start_neighbor_keys[0]]
+    mask_contour = np.zeros(grid.shape, dtype=bool)
 
-    while len(key_path) == 2 or key_path[-1] != start_key:
-        neighbors = flat_grid[key_path[-1]]
-        assert neighbors is not None
+    contour_path: List[PairIJ] = [grid.start]
+    while contour_path[-1] != grid.start or len(contour_path) == 1:
+        crt_ij = contour_path[-1]
+        next_ij = None
+        if len(contour_path) == 1:
+            next_ij = grid[crt_ij][0]
+        else:
+            for n in grid[crt_ij]:
+                if n != contour_path[-2]:
+                    next_ij = n
+                    break
 
-        neighbor_key = neighbors[0] if neighbors[0] != key_path[-2] else neighbors[1]
-        key_path.append(neighbor_key)
+        assert next_ij is not None
+        mask_contour[crt_ij.i, crt_ij.j] = True
+        contour_path.append(next_ij)
 
-    return math.floor((len(key_path)-1)/2)
-
-
-def key_to_ij(key: int, width: int) -> Tuple[int, int]:
-    i = math.floor(key / width)
-    j = key - i * width
-    return i, j
+    return math.floor((len(contour_path)-1)/2)
 
 
 def part_two(path: str) -> int:
-    flat_grid, start_key, height, width = init_grid(path)
+    grid = NeighborsGrid.from_str(path)
 
-    start_neighbor_keys = flat_grid[start_key]
-    assert start_neighbor_keys is not None
-    key_path: List[int] = [start_key, start_neighbor_keys[0]]
+    mask_contour = np.zeros(grid.shape, dtype=bool)
 
-    labels = np.full((height, width), fill_value=-1, dtype=int)
-    while len(key_path) == 2 or key_path[-1] != start_key:
-        neighbors = flat_grid[key_path[-1]]
-        assert neighbors is not None
+    contour_path: List[PairIJ] = [grid.start]
+    while contour_path[-1] != grid.start or len(contour_path) == 1:
+        crt_ij = contour_path[-1]
+        next_ij = None
+        if len(contour_path) == 1:
+            next_ij = grid[crt_ij][0]
+        else:
+            for n in grid[crt_ij]:
+                if n != contour_path[-2]:
+                    next_ij = n
+                    break
 
-        neighbor_key = neighbors[0] if neighbors[0] != key_path[-2] else neighbors[1]
-        neighbor_i, neighbor_j = key_to_ij(neighbor_key, width)
-        labels[neighbor_i, neighbor_j] = 1
-        key_path.append(neighbor_key)
+        assert next_ij is not None
+        mask_contour[crt_ij.i, crt_ij.j] = True
+        contour_path.append(next_ij)
 
-    plot_int_array(labels)
+    corner_up = set({"L",  "J"})
+    corner_down = set({"7", "F"})
+    border_counts = np.zeros(grid.shape, dtype=int)
+    for i in range(grid.shape[0]):
+        crt_border_count = 0
+        last_corner = None
+
+        for j in range(grid.shape[1]):
+            ij = PairIJ(i, j)
+            symbol = grid.get_symbol(ij)
+            if mask_contour[i, j]:
+                if symbol == "|":
+                    crt_border_count += 1
+                elif symbol in corner_up:
+                    if last_corner is None:
+                        last_corner = symbol
+                    else:
+                        if last_corner in corner_down:
+                            crt_border_count += 1
+                        last_corner = None
+                elif symbol in corner_down:
+                    if last_corner is None:
+                        last_corner = symbol
+                    else:
+                        if last_corner in corner_up:
+                            crt_border_count += 1
+                        last_corner = None
+
+            border_counts[i, j] = crt_border_count
+
+    border_counts[mask_contour] = 0
+
+    # plot_int_array(border_counts, block=False)
+    # plot_int_array(mask_contour)
+
+    mask = (border_counts % 2) == 1
+
+    return np.count_nonzero(mask)
