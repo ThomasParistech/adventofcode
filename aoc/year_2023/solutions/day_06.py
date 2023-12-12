@@ -38,6 +38,7 @@ def part_one(path: str) -> int:
         race = Race(time=time, distance=distance)
         c_min, c_max = race.get_winning_interval()
         res *= c_max-c_min+1
+        print(c_max-c_min+1, c_min, c_max)
     return res
 
 
