@@ -1,10 +1,13 @@
 # /usr/bin/python3
 """Parsing."""
+from typing import Dict
 import csv
 from typing import List
 from typing import Tuple
 
 import numpy as np
+
+from aoc.python.utils.utils import last_index, last_np_max
 
 
 def read_csv(path: str, delimiter: str = ',') -> List[List[str]]:
@@ -34,9 +37,24 @@ def read_blocks(path: str, sep: str) -> List[List[str]]:
                 for b in blocks]
 
 
+def block_as_np_str_grid(lines: List[str]) -> np.ndarray:
+    """Read 2D binary grid from symbols"""
+    return np.array([list(line) for line in lines])
+
+
 def block_as_np_binary_grid(lines: List[str], true_symbol: str) -> np.ndarray:
     """Read 2D binary grid from symbols"""
-    return np.array([list(line) for line in lines]) == true_symbol
+    return block_as_np_str_grid(lines) == true_symbol
+
+
+def block_as_np_int_grid(lines: List[str], mapping: Dict[str, int], default: int = -1) -> np.ndarray:
+    """Read 2D int grid from symbols"""
+    str_np = block_as_np_str_grid(lines)
+
+    grid = np.full_like(str_np, fill_value=default, dtype=int)
+    for s, val in mapping.items():
+        grid[str_np == s] = val
+    return grid
 
 
 def split_in_two(s: str, sep: str) -> Tuple[str, str]:
