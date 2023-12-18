@@ -123,24 +123,38 @@ def _measure_run(y: int, d: int, t: bool) -> float:
     return measure
 
 
+def get_most_recent_year() -> int:
+    for k in reversed(range(2000, 2100)):
+        if os.path.isdir(get_year_folder(k)):
+            return k
+    raise ValueError("There's no valid year folder")
+
+
+def get_most_recent_day(year: int) -> int:
+    for k in reversed(range(30)):
+        if get_day_module(year, k, bis=False):
+            return k
+    raise ValueError(f"There's no valid day for year {year}")
+
+
 def main(y: Optional[int] = None,
          d: Optional[int] = None,
-         t: bool = False):
+         all: bool = False,
+         two: bool = False):
     """
     Args:
-        y: Year to run. If not specified, se the latest year
-        d: Day to run. If not specified, run evaluation on all days
-        t: If specified, run part two
+        y: Year to run. If not specified, use the latest year
+        d: Day to run. If not specified, use the latest day of the input year
+        all: If specified, run evaluation on all days
+        two: If specified, run part two
     """
     if y is None:
-        for k in reversed(range(2000, 2100)):
-            if os.path.isdir(get_year_folder(k)):
-                y = k
-                break
-        else:
-            raise ValueError("There's no valid year folder")
+        y = get_most_recent_year()
 
     if d is None:
+        d = get_most_recent_day(y)
+
+    if all:
         # MEASURE
         times_part_one: List[float] = []
         times_part_two: List[float] = []
@@ -153,8 +167,8 @@ def main(y: Optional[int] = None,
         # DRAW
         generate_times_figure(y, times_part_one, times_part_two)
     else:
-        run(y, d, t)
-        run(y, d, t, bis=True)  # Run alternative solution if there is one available
+        run(y, d, two)
+        run(y, d, two, bis=True)  # Run alternative solution if there is one available
         export_profiling_events(os.path.join(get_year_folder(y), "profiling/profiling.json"))
 
 

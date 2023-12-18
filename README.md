@@ -19,9 +19,14 @@ To evaluate part 2 of day 19 of the most recent available year, run:
 python3 -m python -d 19 -t
 ```
 
+To evaluate part 2 of the most recent available day of the most recent available year, run:
+```
+python3 -m python -t
+```
+
 To evaluate each day of year 2022 and generate a diagram, run:
 ```
-python3 -m python -y 2022
+python3 -m python -y 2022 -all
 ```
 
 ## Clean code

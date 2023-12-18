@@ -12,3 +12,7 @@ def plot_int_array(x: np.ndarray, block: bool = True):
     plt.gca().set_aspect('equal')
     plt.gca().invert_yaxis()
     plt.show(block=block)
+
+
+def print_int_array(x: np.ndarray, sep: str = ""):
+    print(sep.join([str(int(a)) for a in x]))
