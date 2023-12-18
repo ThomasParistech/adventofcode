@@ -4,6 +4,8 @@ import csv
 from typing import List
 from typing import Tuple
 
+import numpy as np
+
 
 def read_csv(path: str, delimiter: str = ',') -> List[List[str]]:
     """Read CSV file with custom delimiter."""
@@ -22,6 +24,19 @@ def read_lines(path: str) -> List[str]:
     """Read lines"""
     with open(path, "r", encoding="utf-8") as f:
         return [l.strip() for l in f.readlines()]
+
+
+def read_blocks(path: str, sep: str) -> List[List[str]]:
+    """Read lines"""
+    with open(path, "r", encoding="utf-8") as f:
+        blocks = f.read().strip().split(sep)
+        return [[line.strip() for line in b.strip().split("\n")]
+                for b in blocks]
+
+
+def block_as_np_binary_grid(lines: List[str], true_symbol: str) -> np.ndarray:
+    """Read 2D binary grid from symbols"""
+    return np.array([list(line) for line in lines]) == true_symbol
 
 
 def split_in_two(s: str, sep: str) -> Tuple[str, str]:
