@@ -1,13 +1,12 @@
 # /usr/bin/python3
 """Parsing."""
-from typing import Dict
 import csv
+from typing import Dict
 from typing import List
+from typing import Optional
 from typing import Tuple
 
 import numpy as np
-
-from aoc.python.utils.utils import last_index, last_np_max
 
 
 def read_csv(path: str, delimiter: str = ',') -> List[List[str]]:
@@ -47,13 +46,20 @@ def block_as_np_binary_grid(lines: List[str], true_symbol: str) -> np.ndarray:
     return block_as_np_str_grid(lines) == true_symbol
 
 
-def block_as_np_int_grid(lines: List[str], mapping: Dict[str, int], default: int = -1) -> np.ndarray:
+def block_as_np_int_grid(lines: List[str], mapping: Dict[str, int], default: Optional[int] = None) -> np.ndarray:
     """Read 2D int grid from symbols"""
     str_np = block_as_np_str_grid(lines)
 
-    grid = np.full_like(str_np, fill_value=default, dtype=int)
+    if default is None:
+        fill_value = max(mapping.values())+1
+    else:
+        fill_value = default
+    grid = np.full_like(str_np, fill_value=fill_value, dtype=int)
     for s, val in mapping.items():
         grid[str_np == s] = val
+
+    if default is None:
+        assert not np.any(grid == fill_value)
     return grid
 
 

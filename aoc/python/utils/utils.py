@@ -1,8 +1,8 @@
 # /usr/bin/python3
 """Utils."""
-import numpy as np
-
 from typing import Any
+
+import numpy as np
 
 
 def last_index(s: str, c: str) -> int:
