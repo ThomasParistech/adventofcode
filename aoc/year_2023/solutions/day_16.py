@@ -1,5 +1,6 @@
 # /usr/bin/python3
 """Day 16."""
+from dataclasses import dataclass
 import copy
 from typing import Dict
 from typing import List, Tuple
@@ -54,17 +55,31 @@ TRANSITIONS: Dict[str, Dict[Direction, Direction]] = {
 }
 
 
-def part_one(path: str) -> int:
-    grid = block_as_np_str_grid(read_lines(path))
+@dataclass
+class DirectionQueue:
+    data: List[Tuple[int, int, Direction]]
 
+    def __init__(self, init_i: int, init_j: int, src_direction: Direction):
+        self.data = [(init_i, init_j, src_direction)]
+
+    def append(self, src_i: int, src_j: int, direction: Direction):
+        new_i, new_j = direction.move(src_i, src_j)
+        self.data.append((new_i, new_j, direction))
+
+    def empty(self) -> bool:
+        return len(self.data) == 0
+
+    def pop(self) -> Tuple[int, int, Direction]:
+        return self.data.pop()
+
+
+def get_energized_mask(grid: np.ndarray, i: int, j: int, direction: Direction) -> np.ndarray:
     seen_cache = np.zeros((grid.shape[0], grid.shape[1], 4), dtype=bool)
 
-    queue: List[Tuple[int, int, Direction]] = [(0, -1, Direction.RIGHT)]
+    queue = DirectionQueue(i, j, direction)
 
-    while len(queue) != 0:
+    while not queue.empty():
         i, j, direction = queue.pop()
-
-        i, j = direction.move(i, j)
 
         if not (0 <= i < grid.shape[0] and 0 <= j < grid.shape[1]):
             continue
@@ -76,23 +91,48 @@ def part_one(path: str) -> int:
         symbol = grid[i, j]
         if symbol == "-":
             if direction in (Direction.UP, Direction.BOTTOM):
-                queue.append((i, j, Direction.LEFT))
-                queue.append((i, j, Direction.RIGHT))
+                queue.append(i, j, Direction.LEFT)
+                queue.append(i, j, Direction.RIGHT)
                 continue
         elif symbol == "|":
             if direction in (Direction.LEFT, Direction.RIGHT):
-                queue.append((i, j, Direction.UP))
-                queue.append((i, j, Direction.BOTTOM))
+                queue.append(i, j, Direction.UP)
+                queue.append(i, j, Direction.BOTTOM)
                 continue
         elif symbol in ("\\", "/"):
-            queue.append((i, j, TRANSITIONS[symbol][direction]))
+            queue.append(i, j, TRANSITIONS[symbol][direction])
             continue
 
-        queue.append((i, j, direction))
+        queue.append(i, j, direction)
 
-    energized = np.any(seen_cache, axis=-1)
+    return np.any(seen_cache, axis=-1)
+
+
+def part_one(path: str) -> int:
+    grid = block_as_np_str_grid(read_lines(path))
+    energized = get_energized_mask(grid, 0, 0, Direction.RIGHT)
+
     return int(np.count_nonzero(energized))
 
 
 def part_two(path: str) -> int:
-    return -1
+    grid = block_as_np_str_grid(read_lines(path))
+
+    candidates = [(i, 0, Direction.RIGHT)
+                  for i in range(grid.shape[0])]
+    candidates += [(i, grid.shape[0]-1, Direction.LEFT)
+                   for i in range(grid.shape[0])]
+    candidates += [(0, j, Direction.BOTTOM)
+                   for j in range(grid.shape[1])]
+    candidates += [(grid.shape[1]-1, j, Direction.UP)
+                   for j in range(grid.shape[1])]
+
+    max_n_energized = 0
+    for i, j, direction in candidates:
+        energized = get_energized_mask(grid, i, j, direction)
+        n_energized = int(np.count_nonzero(energized))
+
+        if n_energized > max_n_energized:
+            max_n_energized = n_energized
+
+    return max_n_energized
